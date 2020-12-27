@@ -76,9 +76,9 @@ running. Like so:
 
 If the check fails for whatever reason, the "old" page will not be overridden.
 
-[1]: okay.png
-[2]: fail.png
-[3]: firstVersion.png
-[4]: many.png
+[1]: screenshots/okay.png
+[2]: screenshots/fail.png
+[3]: screenshots/firstVersion.png
+[4]: screenshots/many.png
 [5]: https://acme.com/software/micro_httpd/
 [6]: https://raymii.org
