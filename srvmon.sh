@@ -43,7 +43,7 @@ doRequest() {
   name="${1}"
   url="${2}"
   checkStartTimeMs=$(date +%s%3N) # epoch in microseconds, but stripped so it's milliseconds
-  statuscode=$(curl --max-time 10 --silent --show-error --insecure --output /dev/null --write-out "%{http_code}" "$url" 2>${tempfolder}/FAIL/${name}.error)
+  checkStatusCode=$(curl --max-time 10 --silent --show-error --insecure --output /dev/null --write-out "%{http_code}" "$url" 2>${tempfolder}/FAIL/${name}.error)
   checkEndTimeMs=$(date +%s%3N)
   timeCheckTook=$((checkEndTimeMs-checkStartTimeMs))
   
@@ -51,10 +51,10 @@ doRequest() {
     defaultExpectedStatusCode=${statuscode[${name}]}
   fi 
 
-  if [[ ${defaultExpectedStatusCode} -eq ${statuscode} ]]; then
+  if [[ ${defaultExpectedStatusCode} -eq ${checkStatusCode} ]]; then
     echo ${timeCheckTook} > ${tempfolder}/OK/${name}.duration
   else
-    echo ${statuscode} > ${tempfolder}/FAIL/${name}.status
+    echo ${checkStatusCode} > ${tempfolder}/FAIL/${name}.status
   fi
 }
 
