@@ -15,6 +15,8 @@ is not what is configured or there is a timeout or another error, the script con
 
 Author: [Remy van Elst][6]
 
+[Website with more information][8]
+
 ## Installation & Configuration
 
 Make sure you have curl installed (`apt install curl`). If you need a very simple webserver, try [micro-httpd, by ACME][5]. (`apt install micro-httpd`).
@@ -85,3 +87,4 @@ asked me to make it public, but before I did that I polished it up a bit.
 [4]: screenshots/many.png
 [5]: https://acme.com/software/micro_httpd/
 [6]: https://raymii.org
+[8]: https://raymii.org/s/software/Bash_HTTP_Monitoring_Dashboard.html
