@@ -81,12 +81,12 @@ writeOkayChecks() {
   if [[ okCount -gt 0 ]]; then
     for filename in "${okFiles[@]}"; do
       if [[ -r $filename ]]; then
-        value="$(cat $filename)"
+        value="$(cat "$filename")"
         filenameWithoutExt=${filename%.*}
         echo '<a href="#" class="btn btn-success disabled" tabindex="-1" role="button" aria-disabled="true" style="margin-top: 10px; padding: 10px;">'
         echo "${filenameWithoutExt}"
         echo "<font color=LightGray> ("
-        echo ${value}
+        echo "${value}"
         echo " ms)</font>"
         echo "</a> &nbsp;"
       fi
@@ -117,7 +117,7 @@ writeFailedChecks() {
         else
           curlError="Status code does not match expected code"
         fi
-        status="$(cat ${filename})"
+        status="$(cat "${filename}")"
         echo "<tr class='table-danger'><td>"
         echo "${filenameWithoutExt}"
         echo "</td><td>"
@@ -144,7 +144,6 @@ writeFailedChecks() {
 cleanupFailedCheckFiles() {
   pushd "${tempfolder}/FAIL" >/dev/null 2>&1
   errorFiles=(*.error)
-  errorCount=${#errorFiles[@]}
   for filename in "${errorFiles[@]}"; do
     if [[ -r $filename ]]; then
       rm "${filename}"
@@ -152,7 +151,6 @@ cleanupFailedCheckFiles() {
   done
 
   statusFiles=(*.status)
-  statusCount=${#statusFiles[@]}
   for filename in "${statusFiles[@]}"; do
     if [[ -r $filename ]]; then
       rm "${filename}"
