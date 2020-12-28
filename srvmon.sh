@@ -18,7 +18,7 @@ urls[www.google.com]="https://www.google.com"
 urls[www.smbc-comics.com]="https://www.smbc-comics.com"
 urls[xkcd.com]="https://xkcd.com"
 
-# The default status code. Can be overriden per URL lower in the script.
+# The default status code. Can be overridden per URL lower in the script.
 defaultExpectedStatusCode=200
 
 # Expected code for url, key must match urls[]. Only for URL's you consider UP, but for example require authentication
