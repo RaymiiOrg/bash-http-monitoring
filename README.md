@@ -45,7 +45,7 @@ to monitor. It can be just a domain, an IP or an actual URL, including port and 
 
 If you want to override the default status code for a check, this is the syntax:
 
-	statuscode[gist.github.com]=302
+	statuscode[gists]=302
 
 The first part between the square brackets must match the `urls[]` part.
 
