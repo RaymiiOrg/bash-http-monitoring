@@ -33,7 +33,7 @@ Clone the git repository:
 	git clone https://github.com/RaymiiOrg/bash-http-monitoring.git
 	cd bash-http-monitoring
 
-Edit the `srvmon.sh` script and add your sites. A few examples are provided. This is the syntax:
+Edit the `srvmon` script and add your sites. A few examples are provided. This is the syntax:
 
 	urls[gists]="https://gist.github.com"
 	urls[lobsters]="https://lobste.rs"
@@ -54,11 +54,12 @@ Further global configuration options include:
 	maxConcurrentCurls=12 # How many curl checks to run at the same time
 	defaultTimeOut=10 # Max timeout of a check in seconds
 	flapRetry=5 # After how many seconds should we re-check any failed checks? (To prevent flapping)
-	title="Status Dashboard" # Title of the webpage
+	title="Status Dashboard" # Title of the webpage 
+	cgi=false # Enable or disable CGI mode
 
 Execute the script and send the output to a file in your webservers documentroot:
 
-	bash srvmon.sh > /var/www/index.html
+	bash srvmon > /var/www/index.html
 
 View that file in a web browser.
 
@@ -68,9 +69,17 @@ If you want to set up a cronjob, send the output to a temp file and when finishe
 file over the "actual" file. Otherwise you might end up with an incomplete page when the checks are 
 running. Like so:
 
-	* * * * * /bin/bash /opt/srvmon/srvmon.sh > /var/www/index.html.tmp && /bin/mv /var/www/index.html.tmp /var/www/index.html
+	* * * * * /bin/bash /opt/srvmon/srvmon > /var/www/index.html.tmp && /bin/mv /var/www/index.html.tmp /var/www/index.html
 
 If the check fails for whatever reason, the "old" page will not be overridden.
+
+### CGI mode
+
+If you want to set up CGI mode, you need to copy the script to your server CGI directory. 
+You can use `docker` for this purpose. Like so:
+
+	docker run -d -p 9090:80 -v $PWD/srvmon:/usr/local/apache2/cgi-bin/srvmon hypoport/httpd-cgi
+
 
 
 ## Screenshots 
