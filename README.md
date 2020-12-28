@@ -2,8 +2,8 @@
 
 ![all is well image][1]
 
-HTTP(s) monitoring webpage via shell script. Parallel checking, thus very fast, only dependencies are
-curl and bash (version 4 or above). For all of you who want a simple script with a nice webpage to check
+HTTP(s) monitoring dashboard webpage via shell script. Parallel checking, thus very fast, only dependencies are
+curl, coreutils and bash (version 4 or above). For all of you who want a simple script with a nice webpage to check
 a few websites. Perfect for a wall mounted monitoring display and a Raspberry Pi.
 
 Installation and configuration is easy to do inside the script. It scales well, both on the checking side
@@ -13,9 +13,16 @@ You can set an expected status code and a max timeout per check, so if you consi
 it returns a 302 (redirect) or 401 (unauthorized) the script consider that okay. If the status code
 is not what is configured or there is a timeout or another error, the script considers the check failed.
 
+If a check fails, the script will check that specific one again after 5 seconds to prevent flapping. 
+
 Author: [Remy van Elst][6]
 
 [Website with more information][8]
+
+What this does not have:
+
+- Notifications
+- History
 
 ## Installation & Configuration
 
@@ -41,6 +48,13 @@ If you want to override the default status code for a check, this is the syntax:
 	statuscode[gist.github.com]=302
 
 The first part between the square brackets must match the `urls[]` part.
+
+Further global configuration options include:
+
+	maxConcurrentCurls=12 # How many curl checks to run at the same time
+	defaultTimeOut=10 # Max timeout of a check in seconds
+	flapRetry=5 # After how many seconds should we re-check any failed checks? (To prevent flapping)
+	title="Status Dashboard" # Title of the webpage
 
 Execute the script and send the output to a file in your webservers documentroot:
 

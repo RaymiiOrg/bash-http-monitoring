@@ -1,6 +1,15 @@
 #!/bin/bash
-# author: Remy van Elst - https://raymii.org
-# license: gnu gpl v3
+# Copyright 2020 - Remy van Elst - https://raymii.org/s/software/Bash_HTTP_Monitoring_Dashboard.html
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Afferro General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Start of configuration.
 
@@ -30,6 +39,12 @@ maxConcurrentCurls=12
 
 # Max timeout of a check in seconds
 defaultTimeOut=10
+
+# After how many seconds should we re-check any failed checks? (To prevent flapping)
+flapRetry=5
+
+# Title of the webpage
+title="Status Dashboard"
 
 # Start of script. Do not edit below
 # Exit immediately if a command exits with a non-zero status.
@@ -61,8 +76,16 @@ doRequest() {
 
   if [[ ${expectedStatusCode} -eq ${checkStatusCode} ]]; then
     echo "${timeCheckTook}" > "${tempfolder}/OK/${name}.duration"
+    # remove any previous failed check attempt
+    if [[ -r "${tempfolder}/FAIL/${name}.status" ]]; then
+      rm "${tempfolder}/FAIL/${name}.status"
+    fi
   else
     echo "${checkStatusCode}" > "${tempfolder}/FAIL/${name}.status"
+    # remove any previous okay check
+    if [[ -r "${tempfolder}/OK/${name}.duration" ]]; then
+      rm "${tempfolder}/OK/${name}.duration";
+    fi
   fi
 
   # if the error file is empty, remove it.
@@ -71,10 +94,31 @@ doRequest() {
   fi
 }
 
+recheckFailedChecks() {
+  pushd "${tempfolder}/FAIL" >/dev/null 2>&1
+  failFiles=(*.status)   
+  failCount=${#failFiles[@]}
+  if [[ failCount -gt 0 ]]; then
+    echo -e "\e[1;31mFailed checks, re-checking after ${flapRetry} seconds.\e[0m" >&2 # output to stderr
+    sleep "${flapRetry}";
+    for filename in "${failFiles[@]}"; do
+      if [[ -r $filename ]]; then
+        filenameWithoutExt=${filename%.*}
+        if [[ "$(jobs | wc -l)" -ge ${maxConcurrentCurls} ]] ; then # run 12 curl commands at max parallel
+            wait -n
+        fi
+        doRequest "${filenameWithoutExt}" "${urls[${filenameWithoutExt}]}"
+      fi
+    done
+    wait
+  fi
+  popd >/dev/null 2>&1
+}
+
+
 writeOkayChecks() {
   echo "</div></div>"
   echo "<div class=row><div class=col>"
-  echo "<h2>Checks</h2>"
   pushd "${tempfolder}/OK" >/dev/null 2>&1
   okFiles=(*.duration)
   okCount=${#okFiles[@]}
@@ -132,6 +176,7 @@ writeFailedChecks() {
         echo "</td></tr>"
       fi
     done
+    echo "<tr><td colspan=3 class='small'>All failed checks were attempted again after ${flapRetry} seconds and failed again.</td></tr>"
     echo "</tbody></table>"
   else 
     echo '<div class="alert alert-success" role="alert">'
@@ -177,23 +222,22 @@ cleanupOKCheckFiles() {
 writeHeader() {
   echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
   echo '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'
-  echo "<title>Monitoring</title>"
+  echo "<title>${title}</title>"
   echo "</head><body>"
   echo "<div class=container><div class=row><div class=col>"
-  echo "<h1>Monitoring</h1>"
+  echo "<h1>${title}</h1>"
   echo "</div></div>"
   echo "<div class=row><div class=col>"
 }
 
 writeFooter() {
   echo "</div></div>"
+  echo "<br>"
   echo "<div class=row><div class=col>"
-  echo "<h2>Info</h2>"
-  echo "<p>Last check: "
+  echo "<p class=small>Last check: "
   date
-
   echo "<br>Total duration: ${runtime} ms"
-  echo "<br>Monitoring script by <a href='https://raymii.org/'>Remy van Elst</a>. License: GNU AGPLv3. "
+  echo "<br>Monitoring script by <a href='https://raymii.org/s/software/Bash_HTTP_Monitoring_Dashboard.html'>Remy van Elst</a>. License: GNU AGPLv3. "
   echo "<a href='https://github.com/raymiiorg/bash-http-monitoring'>Source code</a>"
   echo "</p>"
   echo "</div></div></div>"
@@ -226,7 +270,11 @@ do
 done
 wait 
 
+# header
 writeHeader
+
+# Re-check any failed checks to prevent flapping
+recheckFailedChecks
 
 # Failed checks, if any, go on top
 writeFailedChecks
