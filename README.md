@@ -55,7 +55,7 @@ Further global configuration options include:
 	defaultTimeOut=10 # Max timeout of a check in seconds
 	flapRetry=5 # After how many seconds should we re-check any failed checks? (To prevent flapping)
 	title="Status Dashboard" # Title of the webpage 
-	cgi=false # Enable or disable CGI mode
+	cgi=false # Enable or disable CGI header
 
 Execute the script and send the output to a file in your webservers documentroot:
 
@@ -73,10 +73,17 @@ running. Like so:
 
 If the check fails for whatever reason, the "old" page will not be overridden.
 
-### CGI mode
+### CGI header
+
+Some HTTP servers, like Apache, support CGI scripts. To make it brief, these are scripts which 
+are handed a HTTP request to reply to.
+
+The main advantage of using the script as a CGI script, is that the page is generated on demand 
+and as such, provides a live-view on each page load.  
+If the page is public, this method should be avoided, as it can be easily abused.
 
 If you want to set up CGI mode, you need to copy the script to your server CGI directory. 
-You can use `docker` for this purpose. Like so:
+You can use `docker` to try this out. Like so:
 
 	docker run -d -p 9090:80 -v $PWD/srvmon:/usr/local/apache2/cgi-bin/srvmon hypoport/httpd-cgi
 
