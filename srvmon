@@ -223,7 +223,7 @@ cleanupOKCheckFiles() {
 
 
 writeHeader() {
-  if [[ "$cgi" = true ]]; then
+  if [[ "${cgi}" = true ]]; then
     printf "Content-type: text/html\n\n";
   fi
   echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
