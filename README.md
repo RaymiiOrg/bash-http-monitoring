@@ -2,7 +2,7 @@
 
 ![all is well image][1]
 
-HTTP(s) monitoring dashboard webpage via shell script. Parallel checking, thus very fast, only dependencies are
+HTTP(s) status  dashboard webpage via shell script. Parallel checking, thus very fast, only dependencies are
 curl, coreutils and bash (version 4 or above). For all of you who want a simple script with a nice webpage to check
 a few websites. Perfect for a wall mounted monitoring display and a Raspberry Pi.
 
