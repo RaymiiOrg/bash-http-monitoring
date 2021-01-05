@@ -11,6 +11,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# macOS compatibility
+unameOut="$(uname -s)"
+case "${unameOut}" in
+  Darwin*)
+    datecmd="gdate"
+    command -v "${datecmd}">/dev/null 2>&1||{ echo "Error: install ${datecmd} first, e.g., via brew install coreutils" >&2; exit 1; }
+    command -v curl>/dev/null 2>&1||{ echo "Error: install curl first, e.g., via brew install curl" >&2; exit 1; }
+    ;;
+  *)
+    datecmd="date"
+    command -v curl>/dev/null 2>&1||{ echo "Error: install curl first, e.g., via apt install curl" >&2; exit 1; }
+esac
+
 # Start of configuration.
 
 #array names must not contain spaces, only a-ZA-Z.
@@ -64,11 +77,11 @@ shopt -s nullglob
 doRequest() {
   name="${1}"
   url="${2}"
-  checkStartTimeMs="$(date +%s%3N)" # epoch in microseconds, but last chars stripped so it's milliseconds
+  checkStartTimeMs="$(${datecmd} +%s%3N)" # epoch in microseconds, but last chars stripped so it's milliseconds
   set +e # curl errors don't count for early exit, turn off e
   checkStatusCode="$(curl --max-time "${defaultTimeOut}" --silent --show-error --insecure --output /dev/null --write-out "%{http_code}" "$url" --stderr "${tempfolder}/FAIL/${name}.error")"
   set -e # turn e back on
-  checkEndTimeMs="$(date +%s%3N)"
+  checkEndTimeMs="$(${datecmd} +%s%3N)"
   timeCheckTook="$((checkEndTimeMs-checkStartTimeMs))"
 
   expectedStatusCode=${defaultExpectedStatusCode}
@@ -254,7 +267,7 @@ writeFooter() {
 # script start 
 
 # Total script duration timer
-start=$(date +%s%3N)
+start=$(${datecmd} +%s%3N)
 
 tmpdir=$(mktemp -d)
 tempfolder=${tmpdir:-/tmp/statusmon/}
@@ -293,7 +306,7 @@ cleanupFailedCheckFiles
 cleanupOKCheckFiles
 
 # stop the total timer
-end=$(date +%s%3N)
+end=$(${datecmd} +%s%3N)
 runtime=$((end-start))
 
 writeFooter
