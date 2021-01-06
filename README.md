@@ -69,7 +69,7 @@ On Mac OS X the builtin bash version is too old and the bsd date utility does
 not support the time in milliseconds option, so you have 
 to use [homebrew](https://brew.sh) to install coreutils and bash:
 
-    brew install date coreutils curl
+    brew install bash coreutils curl
 
 
 ### Cronjob setup
