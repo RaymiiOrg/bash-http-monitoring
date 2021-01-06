@@ -72,6 +72,13 @@ to use [homebrew](https://brew.sh) to install coreutils and bash:
     brew install bash coreutils curl
 
 
+Then you have to run the script with that bash version:
+
+    /usr/local/Cellar/bash/#VERSION#/bin/bash
+
+Also in the cronjob if you choose to set that up.
+
+
 ### Cronjob setup
 
 If you want to set up a cronjob, send the output to a temp file and when finished, move that temp
