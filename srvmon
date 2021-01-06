@@ -11,17 +11,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# macOS compatibility
-unameOut="$(uname -s)"
-case "${unameOut}" in
+# helper functions
+command_exists() {
+    # check if command exists and fail otherwise
+    command -v "$1" >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        echo "I require '$1' but it's not installed. Please install it. Aborting."
+        exit 1
+    fi
+}
+
+# environment checks
+[ "${BASH_VERSINFO:-0}" -lt 4 ] && { echo "I require at least Bash version 4. Aborting." >&2 ; exit 2; }
+command_exists curl
+
+case "$(uname -s)" in
   Darwin*)
     datecmd="gdate"
-    command -v "${datecmd}">/dev/null 2>&1||{ echo "Error: install ${datecmd} first, e.g., via brew install coreutils" >&2; exit 1; }
-    command -v curl>/dev/null 2>&1||{ echo "Error: install curl first, e.g., via brew install curl" >&2; exit 1; }
+    command_exists "${datecmd}"
     ;;
   *)
     datecmd="date"
-    command -v curl>/dev/null 2>&1||{ echo "Error: install curl first, e.g., via apt install curl" >&2; exit 1; }
 esac
 
 # Start of configuration.
