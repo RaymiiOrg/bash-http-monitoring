@@ -65,7 +65,9 @@ View that file in a web browser.
 
 #### OS X specifics 
 
-On Mac OS X the builtin bash version is too old and the bsd date utility does not support the time in milliseconds option, so you have to use homebrew to install coreutils and bash:
+On Mac OS X the builtin bash version is too old and the bsd date utility does 
+not support the time in milliseconds option, so you have 
+to use [homebrew](https://brew.sh) to install coreutils and bash:
 
     brew install date coreutils curl
 
