@@ -63,6 +63,13 @@ Execute the script and send the output to a file in your webservers documentroot
 
 View that file in a web browser.
 
+#### OS X specifics 
+
+On Mac OS X the builtin bash version is too old and the bsd date utility does not support the time in milliseconds option, so you have to use homebrew to install coreutils and bash:
+
+    brew install date coreutils curl
+
+
 ### Cronjob setup
 
 If you want to set up a cronjob, send the output to a temp file and when finished, move that temp
