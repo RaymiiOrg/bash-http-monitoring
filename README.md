@@ -2,7 +2,7 @@
 
 ![all is well image][1]
 
-HTTP(s) monitoring dashboard webpage via shell script. Parallel checking, thus very fast, only dependencies are
+HTTP(s) status  dashboard webpage via shell script. Parallel checking, thus very fast, only dependencies are
 curl, coreutils and bash (version 4 or above). For all of you who want a simple script with a nice webpage to check
 a few websites. Perfect for a wall mounted monitoring display and a Raspberry Pi.
 
@@ -72,6 +72,22 @@ Execute the script and send the output to a file in your webservers documentroot
 	bash srvmon > /var/www/index.html
 
 View that file in a web browser.
+
+#### OS X specifics 
+
+On Mac OS X the builtin bash version is too old and the bsd date utility does 
+not support the time in milliseconds option, so you have 
+to use [homebrew](https://brew.sh) to install coreutils and bash:
+
+    brew install bash coreutils curl
+
+
+Then you have to run the script with that bash version:
+
+    /usr/local/Cellar/bash/#VERSION#/bin/bash
+
+Also in the cronjob if you choose to set that up.
+
 
 ### Cronjob setup
 
