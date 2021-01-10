@@ -49,6 +49,10 @@ title="Status Dashboard"
 # Use CGI mode
 cgi=false
 
+# Callback URL for failed checks. Script will do a POST request with
+# the following parameters: urlencode(url), name, expected_status, actual_status, error.
+callbackURL=""
+
 # Start of script. Do not edit below
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -57,7 +61,7 @@ shopt -s nullglob
 
 # start of the function definitions
 
-# This function allows the script to execute all the curl calls in paralell. 
+# This function allows the script to execute all the curl calls in parallel. 
 # Otherwise, if one would timeout or take long, the rest after that would be
 # slower. We're writing the status code to a file, reading that later on. Why? 
 # Because an array cannot be filled via a subprocess (curl ... &)
@@ -139,6 +143,58 @@ writeOkayChecks() {
       fi
     done
   fi
+  popd >/dev/null 2>&1
+}
+
+urlencode() {
+  local LANG=C 
+  local i='' 
+  local c='' 
+  local e=''
+  for ((i=0; i<${#1}; i++)); do
+    c=${1:$i:1}
+    [[ "$c" =~ [a-zA-Z0-9\.\~\_\-] ]] || printf -v c '%%%02X' "'$c"
+    e+="$c"
+  done
+  echo "$e"
+}
+
+doCallbackForFailedChecks() {
+  # If the callback URL is empty, don't do anything.
+  if [[ -z "${callbackURL}" ]]; then
+    return;
+  fi
+
+  pushd "${tempfolder}/FAIL" >/dev/null 2>&1
+  failFiles=(*.status)
+  failCount=${#failFiles[@]}
+  for filename in "${failFiles[@]}"; do
+    if [[ -r $filename ]]; then
+      filenameWithoutExt=${filename%.*}
+      if [[ -r "${filenameWithoutExt}.error" ]]; then
+        curlError="$(cat "${filenameWithoutExt}.error" 2>/dev/null)"
+      else
+        curlError="Status code does not match expected code"
+      fi
+      url="${urls[${filenameWithoutExt}]}"
+      encodedUrl="$(urlencode ${url})"
+      currentStatus="$(cat "${filename}")"
+      expectedStatus="000"
+      if [[ -z "${statuscode[${filenameWithoutExt}]}" ]]; then
+        expectedStatus="${defaultExpectedStatusCode}"
+      else
+        expectedStatus="${statuscode[${filenameWithoutExt}]}"
+      fi
+
+      curlData="{\"url\":\"${encodedUrl}\",\"name\":\"${filenameWithoutExt}\",\"expected_status\":\"${expectedStatus}\",\"actual_status\":\"${currentStatus}\",\"error\":\"${curlError}\"}";
+      echo "${curlData}"
+
+      curl --max-time "${defaultTimeOut}" --silent --show-error --insecure --output /dev/null --request POST \
+          -H "Content-Type: application/json" \
+          --data "${curlData}" \
+          "${callbackURL}"
+    fi
+  done
   popd >/dev/null 2>&1
 }
 
@@ -276,11 +332,11 @@ do
 done
 wait 
 
-# header
-writeHeader
-
 # Re-check any failed checks to prevent flapping
 recheckFailedChecks
+
+# header
+writeHeader
 
 # Failed checks, if any, go on top
 writeFailedChecks
@@ -288,15 +344,18 @@ writeFailedChecks
 # Okay checks go below the failed checks
 writeOkayChecks
 
-# Cleanup the status files
-cleanupFailedCheckFiles
-cleanupOKCheckFiles
-
 # stop the total timer
 end=$(date +%s%3N)
 runtime=$((end-start))
 
 writeFooter
+
+# Execute the callback for any failed URL's
+doCallbackForFailedChecks
+
+# Cleanup the status files
+cleanupFailedCheckFiles
+cleanupOKCheckFiles
 
 popd >/dev/null 2>&1
 

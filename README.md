@@ -24,6 +24,15 @@ What this does not have:
 - Notifications
 - History
 
+There however is the option to set a `callback_url`, whenever a check fails the script will send
+the status to that URL, allowing you to set up your own history logging or alerting.
+
+## Changelog
+
+* 27-12-2020: Initial release
+* 30-12-2020: Added `cgi-bin`/`docker` support
+* 11-01-2021: Added callback URL for failed checks
+
 ## Installation & Configuration
 
 Make sure you have curl installed (`apt install curl`). If you need a very simple webserver, try [micro-httpd, by ACME][5]. (`apt install micro-httpd`).
@@ -56,6 +65,7 @@ Further global configuration options include:
 	flapRetry=5 # After how many seconds should we re-check any failed checks? (To prevent flapping)
 	title="Status Dashboard" # Title of the webpage 
 	cgi=false # Enable or disable CGI header
+	callbackURL="" # leave empty to disable, otherwise see readme
 
 Execute the script and send the output to a file in your webservers documentroot:
 
@@ -87,7 +97,56 @@ You can use `docker` to try this out. Like so:
 
 	docker run -d -p 9090:80 -v $PWD/srvmon:/usr/local/apache2/cgi-bin/srvmon hypoport/httpd-cgi
 
+### Callback URL
 
+This script does not provide other means of alerting or history. If you do want that, you must do
+a bit of work yourself. The script supports a `callback url`, whenever a check failed, it will
+do a POST request to a configurable URL with the status and error. This allows you to setup 
+logging, history, graphs or otherwise alerting yourself. No examples are provided as of yet but
+feel free to open a merge request.
+
+The JSON sent is in the following format:
+
+	{
+		"url": "The configured URL, URL encoded",
+		"name": "The configured name"
+		"expected_status": "The configured expected status code", // as a string
+		"actual_status": "The actual status code", // as a string
+		"error": "descriptive error text (from curl mostly)"
+	} 
+
+Each failed check results in its own request. No bundling is done.
+
+You can use HTTPbin to test locally. HTTPbin is a so called `echo` server, anything 
+that is sent to it is returned for debugging purposes. Set this in the config:
+
+	callbackURL="http://127.0.0.1:8888/post/"
+
+Run httpbin in a local docker:
+
+	docker run -p 8888:80 kennethreitz/httpbin
+
+Configure some failed checks, either a non matching status code or a non-existing domain:
+
+Example json data:
+	
+	{
+		"url": "https%3A%2F%2Fgist.github.com",
+		"name": "gist.github.com",
+		"expected_status": "309",
+		"actual_status": "302",
+		"error": "Status code does not match expected code"
+	} 
+
+Another example:
+
+	{
+		"url": "https%3A%2F%2Fwww.buiekjhkjhkhkhkjhnradar.nl",
+		"name": "www.buienradar.nl",
+		"expected_status": "200",
+		"actual_status": "000",
+		"error": "curl: (6) Could not resolve host: www.buiekjhkjhkhkhkjhnradar.nl"
+	}
 
 ## Screenshots 
 
