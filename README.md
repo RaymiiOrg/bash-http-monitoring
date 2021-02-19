@@ -131,6 +131,26 @@ The JSON sent is in the following format:
 		"error": "descriptive error text (from curl mostly)"
 	} 
 
+It also supports slack webhooks. When the callback URL contains hooks.slack.com, the JSON sent is in the following format:
+
+	{
+		"attachments":[{
+			"color": "e00000",
+			"blocks":[{
+				"type": "section",
+				"text":{
+					"type": "mrkdwn",
+					"text": "*Resource Unavailable*\n
+							*url:* The configured URL\n
+							*name:* The configured name\n
+							*expected_status:* The configured expected status code\n
+							*actual_status:* The actual status code\n
+							*error:* descriptive error text (from curl mostly)"
+				}
+			}]
+		}]
+	}
+
 Each failed check results in its own request. No bundling is done.
 
 You can use HTTPbin to test locally. HTTPbin is a so called `echo` server, anything 
