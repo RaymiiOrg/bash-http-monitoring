@@ -131,25 +131,11 @@ The JSON sent is in the following format:
 		"error": "descriptive error text (from curl mostly)"
 	} 
 
-It also supports slack webhooks. When the callback URL contains hooks.slack.com, the JSON sent is in the following format:
+It also supports slack webhooks. See [here on the Slack site](https://api.slack.com/messaging/webhooks) how to set up a webhook. The callback URL looks like this: 
 
-	{
-		"attachments":[{
-			"color": "e00000",
-			"blocks":[{
-				"type": "section",
-				"text":{
-					"type": "mrkdwn",
-					"text": "*Resource Unavailable*\n
-							*url:* The configured URL\n
-							*name:* The configured name\n
-							*expected_status:* The configured expected status code\n
-							*actual_status:* The actual status code\n
-							*error:* descriptive error text (from curl mostly)"
-				}
-			}]
-		}]
-	}
+    https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+
+When the callback URL contains `hooks.slack.com`, the JSON sent is formatted to match slack's webhook specification.
 
 Each failed check results in its own request. No bundling is done.
 
