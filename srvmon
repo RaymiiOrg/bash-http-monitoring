@@ -211,8 +211,11 @@ doCallbackForFailedChecks() {
 
       # If the callback URL is a slack webhook then structure payload as slack attachment message block instead
       slackRegex="^https\:\/\/hooks\.slack\.com"
+      discordRegex="^https\:\/\/discord\.com"
       if [[ ${callbackURL} =~ ${slackRegex} ]]; then
         curlData="{\"attachments\":[{\"color\":\"e00000\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Resource Unavailable*\\n*url:* ${url}\\n*name:* ${filenameWithoutExt}\\n*expected_status:* ${expectedStatus}\\n*actual_status:* ${currentStatus}\\n*error:* ${curlError}\"}}]}]}"
+      elif [[ ${callbackURL} =~ ${discordRegex} ]]; then
+         curlData="{\"username\":\"Server Monitor\",\"content\":\"*Resource Unavailable*\\n*url:* ${url}\\n*name:* ${filenameWithoutExt}\\n*expected_status:* ${expectedStatus}\\n*actual_status:* ${currentStatus}\\n*error:* ${curlError}\"}"
       else
         curlData="{\"url\":\"${encodedUrl}\",\"name\":\"${filenameWithoutExt}\",\"expected_status\":\"${expectedStatus}\",\"actual_status\":\"${currentStatus}\",\"error\":\"${curlError}\"}";
       fi
